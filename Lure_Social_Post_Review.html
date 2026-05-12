@@ -442,6 +442,15 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .caption-textarea:focus{border-color:var(--steel);}
 .edit-caption-btn{font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;background:none;border:none;padding:3px 0;font-family:'Montserrat',sans-serif;margin-top:4px;display:inline-block;}
 .edit-caption-btn:hover{color:var(--steel);}
+.delete-wrap{margin-top:2px;}
+.delete-post-btn{font-size:11px;font-weight:500;color:#e5a0a0;cursor:pointer;background:none;border:none;padding:3px 0;font-family:'Montserrat',sans-serif;display:inline-block;transition:color 0.15s;}
+.delete-post-btn:hover{color:#dc2626;}
+.delete-confirm{display:flex;align-items:center;gap:8px;margin-top:4px;padding:8px 10px;background:#fef2f2;border-radius:7px;border:1px solid #fecaca;}
+.delete-confirm-text{font-size:11px;font-weight:600;color:#dc2626;flex:1;}
+.delete-confirm-yes{font-size:11px;font-weight:700;color:white;background:#dc2626;border:none;border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Montserrat',sans-serif;transition:background 0.15s;}
+.delete-confirm-yes:hover{background:#b91c1c;}
+.delete-confirm-no{font-size:11px;font-weight:600;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all 0.15s;}
+.delete-confirm-no:hover{border-color:var(--muted);color:var(--text);}
 
 /* ADD POST */
 .add-post-card{background:transparent;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:300px;transition:all 0.2s;color:#9ca3af;font-size:13px;font-weight:500;font-family:'Montserrat',sans-serif;}
@@ -517,11 +526,11 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
-let posts = [{"id":1,"title":"Earth Day / Sustainability Story","date":"2026-04-22","format":"carousel","caption":"Fifteen years ago, Lure opened with the goal of serving fresh, local, and sustainably sourced seafood. Every sourcing decision, every ingredient, every supplier has been chosen with that simple philosophy in mind. Sustainable seafood isn’t a trend for us — it was the whole point from day one.\n\nOur oceans cover most of this Earth. When we say Earth Day matters to us, we mean it in the most literal way."},{"id":8,"title":"Cioppino Appreciation Post","date":"2026-04-26","format":"feed","caption":"Cioppino is the perfect expression of West Coast seafood, and our version has always been a house favorite. Pro tip: order extra sourdough bread, you’re gonna need it!"},{"id":2,"title":"Healthy Eating at Lure","date":"2026-04-30","format":"carousel","caption":"Eating well doesn't have to be a struggle.\n\nAt Lure, we've always believed that healthy food should taste incredible — not like a compromise. Whether you're gluten-free, pescatarian, vegetarian, or just trying to eat cleaner, you'll find something here worth getting excited about.\n\nAnd we're proud to be 100% seed oil free. Because we think you deserve to know exactly what's in your food.\n\nCome eat well. 🌊"},{"id":3,"title":"Mother's Day / Gift Card Push","date":"2026-05-03","format":"carousel","caption":"Still figuring out Mother's Day?\n\nA Lure gift card means she gets to choose her own oysters, her own cocktail, her own moment. Honestly, it might be the best plan you've made all week.\n\nGift cards available in restaurant or online — link in bio."},{"id":10,"title":"Cinco de Mayo - Blueberry Margarita","date":"2026-05-05","format":"carousel","caption":"When you want something better than a basic margarita.\n\nRoasted blueberries. Fresh basil. Fresh-squeezed lime juice. Organic agave. Del Valle tequila. Our Roasted Blueberry Basil Margarita is made fresh every time. \n\nThis is what Cinco de Mayo tastes like at Lure."},{"id":4,"title":"Mother's Day","date":"2026-05-10","format":"carousel","caption":"She deserves oysters.\n\nAnd a table she didn't have to set, dishes she doesn't have to wash, and a meal that actually feels special. Mother's Day at Lure — because she's earned it.\n\nReservations for parties of 8 or more at the link in bio. Smaller parties welcome walk-in — we'd love to see you."},{"id":9,"title":"Bread","date":"2026-05-12","format":"reel","caption":"You came for the oysters. You stayed for the bread. If you know, you know."},{"id":5,"title":"Giant Prawns","date":"2026-05-16","format":"carousel","caption":"Don't call me a shrimp.\n\nWe're gonna need a bigger grill. 🔥\n\nOur giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason.\n\nCome meet them."},{"id":6,"title":"Summer Teaser / Patio Drinks","date":"2026-05-19","format":"reel","caption":"Summer doesn't officially start for a few weeks. We're not waiting."},{"id":7,"title":"Long Weekend / Happy Hour","date":"2026-05-22","format":"carousel","caption":"Long weekend incoming. You know where to find us.\n\nCome eat well. 🌊"},{"id":11,"title":"Memorial Day","date":"2026-05-25","format":"carousel","caption":"Summer starts now."}];
+let posts = [{"id":12,"title":"Mother's Day","date":"2026-05-10","format":"reel","caption":"She deserves oysters.\n\nAnd a table she didn't have to set, dishes she doesn't have to wash, and a meal that actually feels special. Mother's Day at Lure — because she's earned it."},{"id":1,"title":"Best of SLO","date":"2026-05-12","format":"reel","caption":"You voted. We're honored.\n\nLure Fish House was named Best Happy Hour and Best Seafood in SLO County by @NewTimesSLO — and since it comes straight from the readers, it means everything to us.\n\nThank you to everyone who voted, who comes in regularly, and who's made Lure a part of your life. We don't take that lightly.\n\nCome celebrate with us. Happy Hour is waiting. 🥂\n\n#BestHappyHour #BestSeafood #BestOfSLO #NewTimesSLO #AwardWinningSeafood"},{"id":13,"title":"@shareslo Patio Post (collab)","date":"2026-05-15","format":"reel","caption":"Caption TBD"},{"id":14,"title":"Bread","date":"2026-05-17","format":"reel","caption":"You came for the oysters. You stayed for the bread. If you know, you know."},{"id":6,"title":"Summer Teaser / Patio","date":"2026-05-19","format":"reel","caption":"Summer doesn't officially start for a few weeks. We're not waiting.\n\nVideo by @visitventura"},{"id":7,"title":"Long Weekend / Happy Hour","date":"2026-05-22","format":"carousel","caption":"Long weekend incoming. You know where to find us.\n\nOur wildly popular Weekend Happy Hour runs from 11:30am–5pm every Sunday."},{"id":11,"title":"Memorial Day","date":"2026-05-25","format":"carousel","caption":"Summer starts now."},{"id":2,"title":"Graduation season (private & group dining)","date":"2026-06-02","format":"carousel","caption":"They worked for this moment. Make the celebration worthy of it.\n\nLure's private dining and group tables are the perfect setting for graduation dinners — whether it's 8 people or 80. Fresh seafood, full-service hospitality, and a menu built around people who know good food.\n\nReach out through the link in bio to inquire about availability. Booking up fast for June.\n\n#LureFishHouse #PrivateDining #GraduationDinner #GroupDining #ClassOf2026"},{"id":3,"title":"World Oceans Day (Surfrider Partnership)","date":"2026-06-08","format":"reel","caption":"The ocean gives us everything on this menu. We take that seriously.\n\nLure Fish House is a proud Surfrider Foundation Ocean Friendly Restaurant — a designation that reflects how we source, how we operate, and what we stand for. On World Oceans Day, we're grateful for the water that makes it all possible.\n\nLearn more about the Ocean Friendly Restaurant program at @surfrider.\n\n#WorldOceansDay #OceanFriendly #SurfriderFoundation #SustainableSeafood #OceanFriendlyRestaurant"},{"id":5,"title":"Giant Prawns (SAVE FOR LATER)","date":"2026-06-30","format":"carousel","caption":"Don't call me a shrimp.\n\nWe're gonna need a bigger grill. 🔥\n\nOur giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason.\n\nCome meet them."}];
 
 // mediaStore: { postId: { type:'image'|'carousel'|'video', url?, urls?[], coverUrl? } }
-let mediaStore = {"1":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/gdri3wrish4pdzsalo0xh/Lure_Social_2025_04_Apr22_EarthDay_Post_01_v01.jpg?rlkey=1glqhy4ax6711ss3drm2wksk8&dl=0","https://www.dropbox.com/scl/fi/nbkiwlzndc18ha7jkyhey/Lure_Social_2025_04_Apr22_EarthDay_Post_02_v01.jpg?rlkey=1tvmmmwebpes6byfrw05nr9tl&dl=0","https://www.dropbox.com/scl/fi/r939hrme3k1bc8hs1pvg9/Lure_Social_2025_04_Apr22_EarthDay_Post_03_v01.jpg?rlkey=th1zqdw9eub77v3z81rbntpty&dl=0","https://www.dropbox.com/scl/fi/aa0ujh5towsj3725rdwpk/Lure_Social_2025_04_Apr22_EarthDay_Post_04_v01.jpg?rlkey=fj0ab26qaolknitt4mtvgtmfn&dl=0","https://www.dropbox.com/scl/fi/uibwmak3umqtwtlb5x6x8/Lure_Social_2025_04_Apr22_EarthDay_Post_05_v01.jpg?rlkey=knigleqkz3whjzoshss9o65wz&dl=0"]},"2":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/nvf10epp2sa2kb5h0qdo1/Lure_Social_2025_04_Apr30_HealthyEating_Post_01_v01.jpg?rlkey=9ysv5huhv7f0a474ungl5walq&dl=0","https://www.dropbox.com/scl/fi/qbqbzfqgc0z9d7tfmmb5f/Lure_Social_2025_04_Apr30_HealthyEating_Post_02_v01.jpg?rlkey=054cahe0qm7ohw2mxixe8nxw2&dl=0","https://www.dropbox.com/scl/fi/w8vqb6l7mhny7q2schd8i/Lure_Social_2025_04_Apr30_HealthyEating_Post_03_v01.jpg?rlkey=62weobypj12arsar8pqir1ey7&dl=0","https://www.dropbox.com/scl/fi/hr2c4v0hf0qrab3p4b3y3/Lure_Social_2025_04_Apr30_HealthyEating_Post_04_v01.jpg?rlkey=759bbxap4zgwovk8ch4ocsz2p&dl=0","https://www.dropbox.com/scl/fi/gm20hcbo63tq2g7416xd7/Lure_Social_2025_04_Apr30_HealthyEating_Post_05_v01.jpg?rlkey=15bo5cr6ua83u2w928f15pi7h&dl=0","https://www.dropbox.com/scl/fi/vnytlw9xhkpjmq37zpr6n/Lure_Social_2025_04_Apr30_HealthyEating_Post_06_v01.jpg?rlkey=os2ubr5cbv62hmqsq9cg2nc6z&dl=0"]},"3":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/bm0pbgoyrkty3kiij3fds/Lure_Social_2025_05_May3_MothersDayGiftCard_Post_01_v01.jpg?rlkey=somoy6i60djk4gxmaism5ze12&dl=0","https://www.dropbox.com/scl/fi/u47aj8m64sae5hy6omdpi/Lure_Social_2025_05_May3_MothersDayGiftCard_Post_02_v01.jpg?rlkey=v8pao0jlw1stq3de7l89h096f&dl=0","https://www.dropbox.com/scl/fi/j3hc0qv175pg51kv2j15g/Lure_Social_2025_05_May3_MothersDayGiftCard_Post_03_v01.jpg?rlkey=wu17u9e8uaxazyzde1xoe182j&dl=0"]},"8":{"type":"image","url":"https://www.dropbox.com/scl/fi/zao1r1nypssre6ymru4fj/Lure_Social_2025_04_Apr26_Cioppino_Post_v01.jpg?rlkey=dlri8go1zcwj4vg3w60scp993&dl=0"},"10":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/sss3hmq4q89bblrurzeiy/Lure_Social_2025_05_May5_RBBMargarita_Post_01_v01.jpg?rlkey=857ki1zyfkwrbzs43fj3h5p9c&dl=0","https://www.dropbox.com/scl/fi/s7ps3criz5lvd79t68mde/Lure_Social_2025_05_May5_RBBMargarita_Post_02_v01.jpg?rlkey=ib68putr30ft5axg0wth49lrr&dl=0"]}};
-let carouselIndex = {"1":0,"2":0,"3":0,"10":0};
+let mediaStore = {"1":{"type":"video","url":"https://www.dropbox.com/scl/fi/iskuqgmdli7diqsi33suq/Lure_Social_2025_05_May12_BestofSLO_Reel_v01_wMusic.MP4?rlkey=chgfzi7a0vofmjxrwqojyqosr&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/gixaami7mwav225ye17a5/Lure_Social_2025_05_May12_BestofSLO_Reel_Cover_v01.png?rlkey=td4hhtrr5uf6bxl1edk7j5g6e&dl=0"},"2":{"type":"carousel","urls":[]},"6":{"type":"video","url":"https://www.dropbox.com/scl/fi/zqi8jn1j7zd1zhna96bos/Lure_Social_2025_05_May19_SummerTeaser_Reel_v01.mp4?rlkey=fcu3q536wd8gb3llquk3rzf1r&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/loa8hdgema9c2niftdhk9/Lure_Social_2025_05_May19_SummerTeaser_Reel_Cover_v01.png?rlkey=3k0wal82mvtgmbhk615wqpzoz&dl=0"},"12":{"type":"video","url":"https://www.dropbox.com/scl/fi/c69hxb269tmlcu7xdi5zg/Lure_Social_2025_05_May10_MothersDay_Reel_v01.MP4?rlkey=l0466jwvo13vrvmpdu1adnvqs&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/t9ui9w2qj6c6rpb14tzr8/Lure_Social_2025_05_May10_MothersDay_Reel_Cover_v01.png?rlkey=xswk148x8bej1nqrahkqmkppe&dl=0"},"14":{"type":"video","url":"https://www.dropbox.com/scl/fi/5o9oforth1osmmj6m1nyd/Lure_Social_2025_05_May17_Bread_Reel_v01.MP4?rlkey=qn5ezi03e8j0121hvfx6t0p3m&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/2ilufolwm1ab3xrpomfo8/Lure_Social_2025_05_May17_Bread_Reel_Cover_v01.png?rlkey=rann54xeyxmjvc6y2sar1e0kh&dl=0"}};
+let carouselIndex = {"1":0,"2":0};
 let currentView = 'grid';
 let currentFilter = 'all';
 
@@ -697,6 +706,14 @@ function renderCard(post) {
       <textarea class="caption-textarea" id="capta-${post.id}" onblur="saveCaption(${post.id})">${esc(post.caption||'')}</textarea>
       ${isLong?`<button class="read-more" onclick="toggleCaption(${post.id})">Read more</button>`:''}
       <button class="edit-caption-btn" id="editcapbtn-${post.id}" onclick="toggleEditCaption(${post.id})">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-${post.id}">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(${post.id})">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-${post.id}" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(${post.id})">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(${post.id})">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>`;
 }
@@ -907,6 +924,27 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.format-badge')&&!e.target.closest('.format-dropdown'))
     document.querySelectorAll('.format-dropdown').forEach(d=>d.style.display='none');
 });
+
+function showDeleteConfirm(id) {
+  const confirm = document.getElementById(`deleteconfirm-${id}`);
+  const btn = document.querySelector(`#deletewrap-${id} .delete-post-btn`);
+  if (confirm) confirm.style.display = 'flex';
+  if (btn) btn.style.display = 'none';
+}
+function hideDeleteConfirm(id) {
+  const confirm = document.getElementById(`deleteconfirm-${id}`);
+  const btn = document.querySelector(`#deletewrap-${id} .delete-post-btn`);
+  if (confirm) confirm.style.display = 'none';
+  if (btn) btn.style.display = 'inline-block';
+}
+function deletePost(id) {
+  posts.splice(posts.findIndex(p => p.id === id), 1);
+  delete mediaStore[id];
+  delete carouselIndex[id];
+  openPanelId = null;
+  openPanelTab = null;
+  renderGrid();
+}
 
 // ─── FILTER / VIEW ────────────────────────────────────────────────────────────
 function filterPosts(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrid();}
