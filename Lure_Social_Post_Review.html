@@ -1,5 +1,6 @@
 <html lang="en"><head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <script src="Lure_Social_Post_Review_files/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
       (function() {
         const originalConsole = window.console;
@@ -483,7 +484,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 <div class="video-popup-overlay" id="videoPopup" onclick="closeVideoPopup(event)">
   <div class="video-popup-inner">
     <button class="video-popup-close" onclick="closeVideoPopupBtn()">✕</button>
-    <video id="popupVideo" controls="" playsinline=""></video>
+    <video id="popupVideo" controls="controls" playsinline=""></video>
     <div class="video-popup-title" id="popupTitle"></div>
   </div>
 </div>
@@ -494,7 +495,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
     <div class="header-divider"></div>
     <div class="header-subtitle">Social Post Review</div>
   </div>
-  <div class="header-date" id="headerDate"></div>
+  <div class="header-date" id="headerDate">Prepared May 21, 2026</div>
 </header>
 
 <div class="toolbar">
@@ -521,8 +522,1024 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   </div>
 </div>
 
-<div class="stats-bar" id="statsBar"></div>
-<main class="main"><div class="grid" id="postsGrid"></div></main>
+<div class="stats-bar" id="statsBar">
+    <div class="stat"><span class="stat-label">Total:</span><span class="stat-count">11</span></div>
+    <div class="stat"><span class="stat-label">Feed:</span><span class="stat-count">0</span></div>
+    <div class="stat"><span class="stat-label">Reels:</span><span class="stat-count">6</span></div>
+    <div class="stat"><span class="stat-label">Carousels:</span><span class="stat-count">5</span></div>
+    <div class="stat"><span class="stat-label">Stories:</span><span class="stat-count">0</span></div></div>
+<main class="main"><div class="grid" id="postsGrid"><div class="post-card" id="card-12" data-id="12" data-format="reel">
+    <div class="post-media" id="media-12">
+      <div class="video-thumb" onclick="event.stopPropagation();openVideoPopup(12)">
+      <img src="Lure_Social_Post_Review_files/Lure_Social_2025_05_May10_MothersDay_Reel_Cover_v01.png" style="width:100%;height:100%;object-fit:cover;">
+      <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></svg></div>
+    </div>
+      <div class="media-panel" id="panel-12">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab" onclick="switchPanelTab(12,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(12,'carousel')">Carousel</button>
+      <button class="panel-tab active" onclick="switchPanelTab(12,'video')">Video</button>
+    </div>
+
+    <div class="panel-section" id="panel-image-12">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-12" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(12)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-12">
+      <div class="carousel-url-list" id="carousel-list-12"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-12" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(12)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section active" id="panel-video-12">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-12" placeholder="Paste Dropbox video URL…" value="https://www.dropbox.com/scl/fi/c69hxb269tmlcu7xdi5zg/Lure_Social_2025_05_May10_MothersDay_Reel_v01.MP4?rlkey=l0466jwvo13vrvmpdu1adnvqs&amp;dl=0">
+        <button class="url-apply-btn" onclick="applyVideoUrl(12)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-12" placeholder="Paste cover image URL…" value="https://www.dropbox.com/scl/fi/t9ui9w2qj6c6rpb14tzr8/Lure_Social_2025_05_May10_MothersDay_Reel_Cover_v01.png?rlkey=xswk148x8bej1nqrahkqmkppe&amp;dl=0">
+          <button class="url-apply-btn" onclick="applyCoverUrl(12)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(12)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(12)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-12">
+        <div class="format-option" onclick="setFormat(12,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(12,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(12,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(12,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(12)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(12)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          SUN, MAY 10
+        </span>
+        <div class="date-picker-wrap" id="datepicker-12">
+          <input type="date" value="2026-05-10" onchange="saveDate(12,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-12" onclick="editTitle(12)">Mother's Day</div>
+      <input class="post-title-input" id="ttlinp-12" value="Mother's Day" onblur="saveTitle(12)" onkeydown="if(event.key==='Enter')saveTitle(12)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-12">She deserves oysters.
+
+And a table she didn't have to set, dishes she doesn't have to wash, and a meal that actually feels special. Mother's Day at Lure — because she's earned it.</div>
+      <textarea class="caption-textarea" id="capta-12" onblur="saveCaption(12)">She
+ deserves oysters.
+
+And a table she didn't have to set, dishes she doesn't have to wash, and
+ a meal that actually feels special. Mother's Day at Lure — because 
+she's earned it.</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-12" onclick="toggleEditCaption(12)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-12">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(12)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-12" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(12)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(12)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-1" data-id="1" data-format="reel">
+    <div class="post-media" id="media-1">
+      <div class="video-thumb" onclick="event.stopPropagation();openVideoPopup(1)">
+      <img src="Lure_Social_Post_Review_files/Lure_Social_2025_05_May12_BestofSLO_Reel_Cover_v01.png" style="width:100%;height:100%;object-fit:cover;">
+      <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></svg></div>
+    </div>
+      <div class="media-panel" id="panel-1">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab" onclick="switchPanelTab(1,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(1,'carousel')">Carousel</button>
+      <button class="panel-tab active" onclick="switchPanelTab(1,'video')">Video</button>
+    </div>
+
+    <div class="panel-section" id="panel-image-1">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-1" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(1)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-1">
+      <div class="carousel-url-list" id="carousel-list-1"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-1" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(1)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section active" id="panel-video-1">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-1" placeholder="Paste Dropbox video URL…" value="https://www.dropbox.com/scl/fi/iskuqgmdli7diqsi33suq/Lure_Social_2025_05_May12_BestofSLO_Reel_v01_wMusic.MP4?rlkey=chgfzi7a0vofmjxrwqojyqosr&amp;dl=0">
+        <button class="url-apply-btn" onclick="applyVideoUrl(1)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-1" placeholder="Paste cover image URL…" value="https://www.dropbox.com/scl/fi/gixaami7mwav225ye17a5/Lure_Social_2025_05_May12_BestofSLO_Reel_Cover_v01.png?rlkey=td4hhtrr5uf6bxl1edk7j5g6e&amp;dl=0">
+          <button class="url-apply-btn" onclick="applyCoverUrl(1)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(1)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(1)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-1">
+        <div class="format-option" onclick="setFormat(1,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(1,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(1,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(1,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(1)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(1)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          TUE, MAY 12
+        </span>
+        <div class="date-picker-wrap" id="datepicker-1">
+          <input type="date" value="2026-05-12" onchange="saveDate(1,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-1" onclick="editTitle(1)">Best of SLO</div>
+      <input class="post-title-input" id="ttlinp-1" value="Best of SLO" onblur="saveTitle(1)" onkeydown="if(event.key==='Enter')saveTitle(1)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text" id="cap-1">You voted. We're honored.
+
+Lure Fish House was named Best Happy Hour and Best Seafood in SLO County by @NewTimesSLO — and since it comes straight from the readers, it means everything to us.
+
+Thank you to everyone who voted, who comes in regularly, and who's made Lure a part of your life. We don't take that lightly.
+
+Come celebrate with us. Happy Hour is waiting. 🥂
+
+#BestHappyHour #BestSeafood #BestOfSLO #NewTimesSLO #AwardWinningSeafood<div class="caption-fade"></div></div>
+      <textarea class="caption-textarea" id="capta-1" onblur="saveCaption(1)">You
+ voted. We're honored.
+
+Lure Fish House was named Best Happy Hour and Best Seafood in SLO County
+ by @NewTimesSLO — and since it comes straight from the readers, it 
+means everything to us.
+
+Thank you to everyone who voted, who comes in regularly, and who's made 
+Lure a part of your life. We don't take that lightly.
+
+Come celebrate with us. Happy Hour is waiting. 🥂
+
+#BestHappyHour #BestSeafood #BestOfSLO #NewTimesSLO #AwardWinningSeafood</textarea>
+      <button class="read-more" onclick="toggleCaption(1)">Read more</button>
+      <button class="edit-caption-btn" id="editcapbtn-1" onclick="toggleEditCaption(1)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-1">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(1)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-1" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(1)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(1)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-13" data-id="13" data-format="reel">
+    <div class="post-media" id="media-13">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-13">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(13,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(13,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(13,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-13">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-13" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(13)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-13">
+      <div class="carousel-url-list" id="carousel-list-13"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-13" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(13)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-13">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-13" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(13)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-13" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(13)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(13)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(13)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-13">
+        <div class="format-option" onclick="setFormat(13,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(13,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(13,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(13,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(13)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(13)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          FRI, MAY 15
+        </span>
+        <div class="date-picker-wrap" id="datepicker-13">
+          <input type="date" value="2026-05-15" onchange="saveDate(13,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-13" onclick="editTitle(13)">@shareslo Patio Post (collab)</div>
+      <input class="post-title-input" id="ttlinp-13" value="@shareslo Patio Post (collab)" onblur="saveTitle(13)" onkeydown="if(event.key==='Enter')saveTitle(13)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-13">Caption TBD</div>
+      <textarea class="caption-textarea" id="capta-13" onblur="saveCaption(13)">Caption TBD</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-13" onclick="toggleEditCaption(13)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-13">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(13)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-13" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(13)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(13)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-14" data-id="14" data-format="reel">
+    <div class="post-media" id="media-14">
+      <div class="video-thumb" onclick="event.stopPropagation();openVideoPopup(14)">
+      <img src="Lure_Social_Post_Review_files/Lure_Social_2025_05_May17_Bread_Reel_Cover_v00.png" style="width:100%;height:100%;object-fit:cover;">
+      <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></svg></div>
+    </div>
+      <div class="media-panel" id="panel-14">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab" onclick="switchPanelTab(14,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(14,'carousel')">Carousel</button>
+      <button class="panel-tab active" onclick="switchPanelTab(14,'video')">Video</button>
+    </div>
+
+    <div class="panel-section" id="panel-image-14">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-14" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(14)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-14">
+      <div class="carousel-url-list" id="carousel-list-14"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-14" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(14)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section active" id="panel-video-14">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-14" placeholder="Paste Dropbox video URL…" value="https://www.dropbox.com/scl/fi/5o9oforth1osmmj6m1nyd/Lure_Social_2025_05_May17_Bread_Reel_v01.MP4?rlkey=qn5ezi03e8j0121hvfx6t0p3m&amp;dl=0">
+        <button class="url-apply-btn" onclick="applyVideoUrl(14)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-14" placeholder="Paste cover image URL…" value="https://www.dropbox.com/scl/fi/2ilufolwm1ab3xrpomfo8/Lure_Social_2025_05_May17_Bread_Reel_Cover_v01.png?rlkey=rann54xeyxmjvc6y2sar1e0kh&amp;dl=0">
+          <button class="url-apply-btn" onclick="applyCoverUrl(14)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(14)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(14)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-14">
+        <div class="format-option" onclick="setFormat(14,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(14,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(14,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(14,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(14)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(14)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          SUN, MAY 17
+        </span>
+        <div class="date-picker-wrap" id="datepicker-14">
+          <input type="date" value="2026-05-17" onchange="saveDate(14,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-14" onclick="editTitle(14)">Bread</div>
+      <input class="post-title-input" id="ttlinp-14" value="Bread" onblur="saveTitle(14)" onkeydown="if(event.key==='Enter')saveTitle(14)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-14">You came for the oysters. You stayed for the bread. If you know, you know.</div>
+      <textarea class="caption-textarea" id="capta-14" onblur="saveCaption(14)">You came for the oysters. You stayed for the bread. If you know, you know.</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-14" onclick="toggleEditCaption(14)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-14">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(14)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-14" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(14)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(14)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-6" data-id="6" data-format="reel">
+    <div class="post-media" id="media-6">
+      <div class="video-thumb" onclick="event.stopPropagation();openVideoPopup(6)">
+      <img src="Lure_Social_Post_Review_files/Lure_Social_2025_05_May19_SummerTeaser_Reel_Cover_v01.png" style="width:100%;height:100%;object-fit:cover;">
+      <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></svg></div>
+    </div>
+      <div class="media-panel" id="panel-6">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab" onclick="switchPanelTab(6,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(6,'carousel')">Carousel</button>
+      <button class="panel-tab active" onclick="switchPanelTab(6,'video')">Video</button>
+    </div>
+
+    <div class="panel-section" id="panel-image-6">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-6" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(6)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-6">
+      <div class="carousel-url-list" id="carousel-list-6"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-6" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(6)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section active" id="panel-video-6">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-6" placeholder="Paste Dropbox video URL…" value="https://www.dropbox.com/scl/fi/zqi8jn1j7zd1zhna96bos/Lure_Social_2025_05_May19_SummerTeaser_Reel_v01.mp4?rlkey=fcu3q536wd8gb3llquk3rzf1r&amp;dl=0">
+        <button class="url-apply-btn" onclick="applyVideoUrl(6)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-6" placeholder="Paste cover image URL…" value="https://www.dropbox.com/scl/fi/loa8hdgema9c2niftdhk9/Lure_Social_2025_05_May19_SummerTeaser_Reel_Cover_v01.png?rlkey=3k0wal82mvtgmbhk615wqpzoz&amp;dl=0">
+          <button class="url-apply-btn" onclick="applyCoverUrl(6)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(6)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(6)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-6">
+        <div class="format-option" onclick="setFormat(6,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(6,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(6,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(6,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(6)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(6)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          TUE, MAY 19
+        </span>
+        <div class="date-picker-wrap" id="datepicker-6">
+          <input type="date" value="2026-05-19" onchange="saveDate(6,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-6" onclick="editTitle(6)">Summer Teaser / Patio</div>
+      <input class="post-title-input" id="ttlinp-6" value="Summer Teaser / Patio" onblur="saveTitle(6)" onkeydown="if(event.key==='Enter')saveTitle(6)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-6">Summer doesn't officially start for a few weeks. We're not waiting.
+
+Video by @visitventura</div>
+      <textarea class="caption-textarea" id="capta-6" onblur="saveCaption(6)">Summer doesn't officially start for a few weeks. We're not waiting.
+
+Video by @visitventura</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-6" onclick="toggleEditCaption(6)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-6">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(6)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-6" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(6)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(6)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-7" data-id="7" data-format="carousel">
+    <div class="post-media" id="media-7">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-7">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(7,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(7,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(7,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-7">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-7" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(7)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-7">
+      <div class="carousel-url-list" id="carousel-list-7"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-7" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(7)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-7">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-7" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(7)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-7" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(7)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(7)">Done</button>
+  </div>
+      <button class="format-badge badge-carousel" onclick="event.stopPropagation();toggleFmtDrop(7)">Carousel</button>
+      <div class="format-dropdown" id="fmtdrop-7">
+        <div class="format-option" onclick="setFormat(7,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(7,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(7,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(7,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(7)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(7)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          FRI, MAY 22
+        </span>
+        <div class="date-picker-wrap" id="datepicker-7">
+          <input type="date" value="2026-05-22" onchange="saveDate(7,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-7" onclick="editTitle(7)">Long Weekend / Happy Hour</div>
+      <input class="post-title-input" id="ttlinp-7" value="Long Weekend / Happy Hour" onblur="saveTitle(7)" onkeydown="if(event.key==='Enter')saveTitle(7)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-7">Long weekend incoming. You know where to find us.
+
+Our wildly popular Weekend Happy Hour runs from 11:30am–5pm every Sunday.</div>
+      <textarea class="caption-textarea" id="capta-7" onblur="saveCaption(7)">Long weekend incoming. You know where to find us.
+
+Our wildly popular Weekend Happy Hour runs from 11:30am–5pm every Sunday.</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-7" onclick="toggleEditCaption(7)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-7">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(7)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-7" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(7)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(7)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-11" data-id="11" data-format="carousel">
+    <div class="post-media" id="media-11">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-11">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(11,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(11,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(11,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-11">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-11" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(11)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-11">
+      <div class="carousel-url-list" id="carousel-list-11"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-11" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(11)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-11">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-11" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(11)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-11" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(11)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(11)">Done</button>
+  </div>
+      <button class="format-badge badge-carousel" onclick="event.stopPropagation();toggleFmtDrop(11)">Carousel</button>
+      <div class="format-dropdown" id="fmtdrop-11">
+        <div class="format-option" onclick="setFormat(11,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(11,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(11,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(11,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(11)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(11)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          MON, MAY 25
+        </span>
+        <div class="date-picker-wrap" id="datepicker-11">
+          <input type="date" value="2026-05-25" onchange="saveDate(11,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-11" onclick="editTitle(11)">Memorial Day</div>
+      <input class="post-title-input" id="ttlinp-11" value="Memorial Day" onblur="saveTitle(11)" onkeydown="if(event.key==='Enter')saveTitle(11)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-11">Summer starts now.</div>
+      <textarea class="caption-textarea" id="capta-11" onblur="saveCaption(11)">Summer starts now.</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-11" onclick="toggleEditCaption(11)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-11">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(11)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-11" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(11)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(11)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-2" data-id="2" data-format="carousel">
+    <div class="post-media" id="media-2">
+      <div class="media-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg><span>No slides added yet</span></div>
+      <div class="media-panel" id="panel-2">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab" onclick="switchPanelTab(2,'image')">Image</button>
+      <button class="panel-tab active" onclick="switchPanelTab(2,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(2,'video')">Video</button>
+    </div>
+
+    <div class="panel-section" id="panel-image-2">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-2" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(2)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section active" id="panel-carousel-2">
+      <div class="carousel-url-list" id="carousel-list-2"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-2" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(2)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-2">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-2" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(2)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-2" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(2)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(2)">Done</button>
+  </div>
+      <button class="format-badge badge-carousel" onclick="event.stopPropagation();toggleFmtDrop(2)">Carousel</button>
+      <div class="format-dropdown" id="fmtdrop-2">
+        <div class="format-option" onclick="setFormat(2,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(2,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(2,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(2,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(2)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(2)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          TUE, JUN 2
+        </span>
+        <div class="date-picker-wrap" id="datepicker-2">
+          <input type="date" value="2026-06-02" onchange="saveDate(2,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-2" onclick="editTitle(2)">Graduation season (private &amp; group dining)</div>
+      <input class="post-title-input" id="ttlinp-2" value="Graduation season (private &amp; group dining)" onblur="saveTitle(2)" onkeydown="if(event.key==='Enter')saveTitle(2)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text" id="cap-2">They worked for this moment. Make the celebration worthy of it.
+
+Lure's private dining and group tables are the perfect setting for graduation dinners — whether it's 8 people or 80. Fresh seafood, full-service hospitality, and a menu built around people who know good food.
+
+Reach out through the link in bio to inquire about availability. Booking up fast for June.
+
+#LureFishHouse #PrivateDining #GraduationDinner #GroupDining #ClassOf2026<div class="caption-fade"></div></div>
+      <textarea class="caption-textarea" id="capta-2" onblur="saveCaption(2)">They
+ worked for this moment. Make the celebration worthy of it.
+
+Lure's private dining and group tables are the perfect setting for 
+graduation dinners — whether it's 8 people or 80. Fresh seafood, 
+full-service hospitality, and a menu built around people who know good 
+food.
+
+Reach out through the link in bio to inquire about availability. Booking
+ up fast for June.
+
+#LureFishHouse #PrivateDining #GraduationDinner #GroupDining 
+#ClassOf2026</textarea>
+      <button class="read-more" onclick="toggleCaption(2)">Read more</button>
+      <button class="edit-caption-btn" id="editcapbtn-2" onclick="toggleEditCaption(2)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-2">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(2)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-2" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(2)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(2)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-3" data-id="3" data-format="reel">
+    <div class="post-media" id="media-3">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-3">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(3,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(3,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(3,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-3">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-3" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(3)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-3">
+      <div class="carousel-url-list" id="carousel-list-3"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-3" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(3)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-3">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-3" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(3)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-3" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(3)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(3)">Done</button>
+  </div>
+      <button class="format-badge badge-reel" onclick="event.stopPropagation();toggleFmtDrop(3)">Reel</button>
+      <div class="format-dropdown" id="fmtdrop-3">
+        <div class="format-option" onclick="setFormat(3,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(3,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(3,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(3,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(3)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(3)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          MON, JUN 8
+        </span>
+        <div class="date-picker-wrap" id="datepicker-3">
+          <input type="date" value="2026-06-08" onchange="saveDate(3,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-3" onclick="editTitle(3)">World Oceans Day (Surfrider Partnership)</div>
+      <input class="post-title-input" id="ttlinp-3" value="World Oceans Day (Surfrider Partnership)" onblur="saveTitle(3)" onkeydown="if(event.key==='Enter')saveTitle(3)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text" id="cap-3">The ocean gives us everything on this menu. We take that seriously.
+
+Lure Fish House is a proud Surfrider Foundation Ocean Friendly Restaurant — a designation that reflects how we source, how we operate, and what we stand for. On World Oceans Day, we're grateful for the water that makes it all possible.
+
+Learn more about the Ocean Friendly Restaurant program at @surfrider.
+
+#WorldOceansDay #OceanFriendly #SurfriderFoundation #SustainableSeafood #OceanFriendlyRestaurant<div class="caption-fade"></div></div>
+      <textarea class="caption-textarea" id="capta-3" onblur="saveCaption(3)">The
+ ocean gives us everything on this menu. We take that seriously.
+
+Lure Fish House is a proud Surfrider Foundation Ocean Friendly 
+Restaurant — a designation that reflects how we source, how we operate, 
+and what we stand for. On World Oceans Day, we're grateful for the water
+ that makes it all possible.
+
+Learn more about the Ocean Friendly Restaurant program at @surfrider.
+
+#WorldOceansDay #OceanFriendly #SurfriderFoundation #SustainableSeafood 
+#OceanFriendlyRestaurant</textarea>
+      <button class="read-more" onclick="toggleCaption(3)">Read more</button>
+      <button class="edit-caption-btn" id="editcapbtn-3" onclick="toggleEditCaption(3)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-3">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(3)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-3" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(3)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(3)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-15" data-id="15" data-format="carousel">
+    <div class="post-media" id="media-15">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-15">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(15,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(15,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(15,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-15">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-15" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(15)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-15">
+      <div class="carousel-url-list" id="carousel-list-15"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-15" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(15)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-15">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-15" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(15)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-15" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(15)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(15)">Done</button>
+  </div>
+      <button class="format-badge badge-carousel" onclick="event.stopPropagation();toggleFmtDrop(15)">Carousel</button>
+      <div class="format-dropdown" id="fmtdrop-15">
+        <div class="format-option" onclick="setFormat(15,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(15,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(15,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(15,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(15)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(15)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          THU, JUN 11
+        </span>
+        <div class="date-picker-wrap" id="datepicker-15">
+          <input type="date" value="2026-06-11" onchange="saveDate(15,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-15" onclick="editTitle(15)">Graduation — last call + menu highlight</div>
+      <input class="post-title-input" id="ttlinp-15" value="Graduation — last call + menu highlight" onblur="saveTitle(15)" onkeydown="if(event.key==='Enter')saveTitle(15)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text" id="cap-15">June graduation dinners are filling up. Don't wait on this one.
+
+Private dining at Lure means the whole group gets the full experience — no rushing, no splitting up, no settling for a booth. Just a beautiful meal, great service, and a night worth remembering.
+
+Link in bio to inquire about group reservations.
+
+#LureFishHouse #PrivateDining #GraduationDinner #GroupDining #ClassOf2026<div class="caption-fade"></div></div>
+      <textarea class="caption-textarea" id="capta-15" onblur="saveCaption(15)">June
+ graduation dinners are filling up. Don't wait on this one.
+
+Private dining at Lure means the whole group gets the full experience — 
+no rushing, no splitting up, no settling for a booth. Just a beautiful 
+meal, great service, and a night worth remembering.
+
+Link in bio to inquire about group reservations.
+
+#LureFishHouse #PrivateDining #GraduationDinner #GroupDining 
+#ClassOf2026</textarea>
+      <button class="read-more" onclick="toggleCaption(15)">Read more</button>
+      <button class="edit-caption-btn" id="editcapbtn-15" onclick="toggleEditCaption(15)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-15">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(15)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-15" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(15)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(15)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="post-card" id="card-5" data-id="5" data-format="carousel">
+    <div class="post-media" id="media-5">
+      <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+      <span>Click "Edit media" to add</span>
+    </div>
+      <div class="media-panel" id="panel-5">
+    <div class="media-panel-title">Add media via URL</div>
+    <div class="panel-type-tabs">
+      <button class="panel-tab active" onclick="switchPanelTab(5,'image')">Image</button>
+      <button class="panel-tab" onclick="switchPanelTab(5,'carousel')">Carousel</button>
+      <button class="panel-tab" onclick="switchPanelTab(5,'video')">Video</button>
+    </div>
+
+    <div class="panel-section active" id="panel-image-5">
+      <div class="url-input-row">
+        <input class="url-input" id="img-url-5" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="applyImageUrl(5)">Apply</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-carousel-5">
+      <div class="carousel-url-list" id="carousel-list-5"></div>
+      <div class="carousel-add-row">
+        <input class="url-input" id="car-url-5" placeholder="Paste Dropbox image URL…">
+        <button class="url-apply-btn" onclick="addCarouselUrl(5)">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="panel-video-5">
+      <div class="url-input-row">
+        <input class="url-input" id="vid-url-5" placeholder="Paste Dropbox video URL…">
+        <button class="url-apply-btn" onclick="applyVideoUrl(5)">Apply</button>
+      </div>
+      <div style="width:100%;margin-top:2px;">
+        <div class="media-panel-title" style="margin-bottom:4px;">Cover image (optional)</div>
+        <div class="url-input-row">
+          <input class="url-input" id="cov-url-5" placeholder="Paste cover image URL…">
+          <button class="url-apply-btn" onclick="applyCoverUrl(5)">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="panel-cancel-btn" onclick="closePanel(5)">Done</button>
+  </div>
+      <button class="format-badge badge-carousel" onclick="event.stopPropagation();toggleFmtDrop(5)">Carousel</button>
+      <div class="format-dropdown" id="fmtdrop-5">
+        <div class="format-option" onclick="setFormat(5,'feed')">Feed</div>
+        <div class="format-option" onclick="setFormat(5,'reel')">Reel</div>
+        <div class="format-option" onclick="setFormat(5,'carousel')">Carousel</div>
+        <div class="format-option" onclick="setFormat(5,'story')">Story</div>
+      </div>
+      <button class="edit-media-btn" onclick="event.stopPropagation();openPanel(5)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3L11 2z"></path></svg>
+        Edit media
+      </button>
+    </div>
+    <div class="post-body">
+      <div class="post-date-wrap">
+        <span class="post-date" onclick="toggleDatePicker(5)">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="10" height="9" rx="1"></rect><path d="M1 5h10M4 1v2M8 1v2"></path></svg>
+          SUN, JUN 14
+        </span>
+        <div class="date-picker-wrap" id="datepicker-5">
+          <input type="date" value="2026-06-14" onchange="saveDate(5,this.value)">
+        </div>
+      </div>
+      <div class="post-title" id="ttl-5" onclick="editTitle(5)">Giant Prawns (SAVE FOR LATER)</div>
+      <input class="post-title-input" id="ttlinp-5" value="Giant Prawns (SAVE FOR LATER)" onblur="saveTitle(5)" onkeydown="if(event.key==='Enter')saveTitle(5)">
+      <div class="caption-label">Caption</div>
+      <div class="caption-text expanded" id="cap-5">Don't call me a shrimp.
+
+We're gonna need a bigger grill. 🔥
+
+Our giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason.
+
+Come meet them.</div>
+      <textarea class="caption-textarea" id="capta-5" onblur="saveCaption(5)">Don't call me a shrimp.
+
+We're gonna need a bigger grill. 🔥
+
+Our giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason.
+
+Come meet them.</textarea>
+      
+      <button class="edit-caption-btn" id="editcapbtn-5" onclick="toggleEditCaption(5)">✎ Edit caption</button>
+      <div class="delete-wrap" id="deletewrap-5">
+        <button class="delete-post-btn" onclick="showDeleteConfirm(5)">✕ Delete post</button>
+        <div class="delete-confirm" id="deleteconfirm-5" style="display:none;">
+          <span class="delete-confirm-text">Are you sure?</span>
+          <button class="delete-confirm-yes" onclick="deletePost(5)">Yes, delete</button>
+          <button class="delete-confirm-no" onclick="hideDeleteConfirm(5)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div><div class="add-post-card" onclick="showAddForm()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>
+      Add post
+    </div></div></main>
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
