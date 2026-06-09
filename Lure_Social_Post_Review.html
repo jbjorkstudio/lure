@@ -296,6 +296,303 @@
       })();
     </script>
   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      (function() {
+        const originalConsole = window.console;
+        window.console = {
+          log: (...args) => {
+            originalConsole.log(...args);
+            window.parent.postMessage({ type: 'console', message: args.join(' ') }, '*');
+          },
+          error: (...args) => {
+            originalConsole.error(...args);
+            window.parent.postMessage({ type: 'console', message: 'Error: ' + args.join(' ') }, '*');
+          },
+          warn: (...args) => {
+            originalConsole.warn(...args);
+            window.parent.postMessage({ type: 'console', message: 'Warning: ' + args.join(' ') }, '*');
+          }
+        };
+
+        let requestId = 0;
+        let callbacksMap = new Map();
+        let streamControllers = new Map();
+        
+        window.claude = {
+          complete: (prompt) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'claudeComplete', id, prompt }, '*');
+            });
+          }
+        };
+
+        window.storage = {
+          get: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageGet', id, key, shared }, '*');
+            });
+          },
+          set: (key, value, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageSet', id, key, value, shared }, '*');
+            });
+          },
+          delete: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageDelete', id, key, shared }, '*');
+            });
+          },
+          list: (prefix, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageList', id, prefix, shared }, '*');
+            });
+          }
+        };
+
+        let pendingBlobs = new Map();
+        URL.createObjectURL = (blob) => {
+          // Store the blob and create an ID and URL for it
+          const blobId = `blob-${Date.now()}-${Math.random()}`;
+          pendingBlobs.set(blobId, blob);
+          return `blob-request://${blobId}`;
+        };
+
+        URL.revokeObjectURL = (url) => {
+          // Remove the blob from our store
+          const blobId = url.replace("blob-request://", "");
+          pendingBlobs.delete(blobId);
+        };
+
+        const getBlobFromURL = (url) => {
+          const blobId = url.replace("blob-request://", "");
+          return pendingBlobs.get(blobId);
+        };
+
+        // Override global fetch with streaming support
+        window.fetch = (url, init = {}) => {
+          return new Promise((resolve, reject) => {
+            const id = requestId++;
+            const channelId = `fetch-${id}-${Date.now()}`;
+            
+            callbacksMap.set(id, { 
+              resolve: (response) => {
+                // Create a ReadableStream for the response body
+                const stream = new ReadableStream({
+                  start(controller) {
+                    streamControllers.set(channelId, controller);
+                  },
+                  cancel() {
+                    streamControllers.delete(channelId);
+                  }
+                });
+                
+                // Create and return the Response with the stream
+                resolve(new Response(stream, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: response.headers
+                }));
+              },
+              reject,
+              channelId
+            });
+            
+            window.parent.postMessage({
+              type: 'proxyFetch',
+              id,
+              url,
+              init,
+              channelId
+            }, '*');
+          });
+        };
+
+        window.addEventListener('message', async (event) => {
+          if (event.data.type === 'takeScreenshot') {
+            const rootElement = document.getElementById('artifacts-component-root-html');
+            if (!rootElement) {
+              window.parent.postMessage({
+                type: 'screenshotError',
+                error: new Error('Root element not found'),
+              }, '*');
+              return;
+            }
+            // Catch CDN load failures (htmlToImage undefined) and toPng errors
+            // so the parent always gets a response instead of hanging forever.
+            try {
+              const screenshot = await htmlToImage.toPng(rootElement, {
+                imagePlaceholder:
+                  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjePDgwX8ACOQDoNsk0PMAAAAASUVORK5CYII=",
+              });
+              window.parent.postMessage({
+                type: 'screenshotData',
+                data: screenshot,
+              }, '*');
+            } catch (err) {
+              window.parent.postMessage({
+                type: 'screenshotError',
+                error: err instanceof Error ? err : new Error(String(err)),
+              }, '*');
+            }
+          } else if (event.data.type === 'claudeComplete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.completion);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'proxyFetchResponse') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+              callbacksMap.delete(event.data.id);
+            } else {
+              // Initial response with headers, status, etc.
+              callback.resolve({
+                status: event.data.status,
+                statusText: event.data.statusText,
+                headers: event.data.headers
+              });
+              // Don't delete the callback yet if streaming
+              if (!event.data.body) {
+                callbacksMap.delete(event.data.id);
+              }
+            }
+          } else if (event.data.type === 'proxyFetchStream') {
+            // Handle streaming data chunks
+            const controller = streamControllers.get(event.data.channelId);
+            if (controller) {
+              if (event.data.error) {
+                controller.error(new Error(event.data.error));
+                streamControllers.delete(event.data.channelId);
+              } else if (event.data.done) {
+                controller.close();
+                streamControllers.delete(event.data.channelId);
+                // Clean up the callback
+                const callback = Array.from(callbacksMap.entries()).find(
+                  ([_, value]) => value.channelId === event.data.channelId
+                );
+                if (callback) {
+                  callbacksMap.delete(callback[0]);
+                }
+              } else if (event.data.chunk) {
+                controller.enqueue(new Uint8Array(event.data.chunk));
+              }
+            }
+          } else if (event.data.type === 'storageGet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageSet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageDelete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageList') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          }
+        });
+
+        window.addEventListener('click', (event) => {
+          const isEl = event.target instanceof HTMLElement;
+          if (!isEl) return;
+    
+          // find ancestor links
+          const linkEl = event.target.closest("a");
+          if (!linkEl || !linkEl.href) return;
+    
+          event.preventDefault();
+          event.stopImmediatePropagation();
+    
+          if (linkEl.href.startsWith("blob-request:")) {
+            const blob = getBlobFromURL(linkEl.href);
+            if (!blob) return;
+            void blob.arrayBuffer().then((data) => {
+              window.parent.postMessage({
+                type: "downloadFile",
+                filename: linkEl.download,
+                data,
+                mimeType: blob.type || "application/octet-stream",
+              });
+            });
+          } else if (linkEl.href.startsWith("data:")) {
+            const [header, base64Data] = linkEl.href.split(",");
+            const mimeMatch = header.match(/data:([^;]+)/);
+            const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+            const binaryString = atob(base64Data);
+            const data = Uint8Array.from(binaryString, (c) =>
+              c.charCodeAt(0),
+            ).buffer;
+            window.parent.postMessage({
+              type: "downloadFile",
+              filename: linkEl.download,
+              data,
+              mimeType,
+            });
+          } else {
+            let linkUrl;
+            try {
+              linkUrl = new URL(linkEl.href);
+            } catch (error) {
+              return;
+            }
+    
+            if (linkUrl.hostname === window.location.hostname) return;
+      
+            window.parent.postMessage({
+              type: 'openExternal',
+              href: linkEl.href,
+            }, '*');
+          }
+      });
+
+        const originalOpen = window.open;
+        window.open = function (url) {
+          window.parent.postMessage({
+            type: "openExternal",
+            href: url,
+          }, "*");
+        };
+
+        window.addEventListener('error', (event) => {
+          window.parent.postMessage({ type: 'console', message: 'Uncaught Error: ' + event.message }, '*');
+        });
+      })();
+    </script>
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Social Post Review — Lure Fish House</title>
@@ -1552,11 +1849,11 @@ Come meet them.</textarea>
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
-let posts = [{"id":6,"title":"Summer Teaser / Patio","date":"2026-05-19","format":"reel","caption":"Summer doesn't officially start for a few weeks. We're not waiting.\n\nVideo by @visitventura"},{"id":7,"title":"Long Weekend / Happy Hour","date":"2026-05-22","format":"reel","caption":"Long weekend incoming. You know where to find us.\n\nOur wildly popular Weekend Happy Hour runs from 11:30am–5pm every Sunday. And if you're in Scottsdale? You also get brunch. (Sorry, California.)"},{"id":11,"title":"Memorial Day","date":"2026-05-25","format":"carousel","caption":"Summer starts now."},{"id":2,"title":"Graduation season (private & group dining)","date":"2026-06-02","format":"carousel","caption":"They worked for this moment. Make the celebration worthy of it.\n\nLure's private dining and group tables are the perfect setting for graduation dinners — whether it's 8 people or 80. Fresh seafood, full-service hospitality, and a menu built around people who know good food.\n\nReach out through the link in bio to inquire about availability. Booking up fast for June.\n\n#LureFishHouse #PrivateDining #GraduationDinner #GroupDining #ClassOf2026"},{"id":3,"title":"World Oceans Day (Surfrider Partnership)","date":"2026-06-08","format":"reel","caption":"The ocean gives us everything on this menu. We take that seriously.\n\nLure Fish House is a proud Surfrider Foundation Ocean Friendly Restaurant — a designation that reflects how we source, how we operate, and what we stand for. On World Oceans Day, we're grateful for the water that makes it all possible.\n\nLearn more about the Ocean Friendly Restaurant program at @surfrider.\n\n#WorldOceansDay #OceanFriendly #SurfriderFoundation #SustainableSeafood #OceanFriendlyRestaurant"},{"id":15,"title":"Graduation — last call + menu highlight","date":"2026-06-11","format":"carousel","caption":"June graduation dinners are filling up. Don't wait on this one.\n\nPrivate dining at Lure means the whole group gets the full experience — no rushing, no splitting up, no settling for a booth. Just a beautiful meal, great service, and a night worth remembering.\n\nLink in bio to inquire about group reservations.\n\n#LureFishHouse #PrivateDining #GraduationDinner #GroupDining #ClassOf2026"},{"id":5,"title":"Giant Prawns","date":"2026-06-14","format":"carousel","caption":"We're gonna need a bigger grill. 🔥\n\nCome meet our giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason. Just don't call them shrimp."},{"id":16,"title":"Father's Day tease — \"Bring Dad to Lure\"","date":"2026-06-16","format":"reel","caption":"FOR CONCEPT (NEED TO SHOOT NEW PHOTOS) Dad doesn't want a card. He wants the catch of the day.\n\nFather's Day is June 21st — reserve your table now before it fills up. Lure is the kind of place that makes dads feel like the meal was worth the drive.\n\n#FathersDay #DadDeservesThis #FathersDayDinner #SeafoodRestaurant #FamilyDinner"},{"id":17,"title":"Lobster Day — menu feature + Father's Day bridge","date":"2026-06-20","format":"carousel","caption":"Happy National Lobster Day. We take this one seriously.\n\nThere are days that deserve a proper celebration — and this is one of them. Come in tonight, or better yet, bring Dad tomorrow and make it a weekend to remember.\n\n#NationalLobsterDay #LobsterDay #FreshSeafood #LobsterLover #CatchOfTheDay"},{"id":18,"title":"Father's Day UGC Content: Surprising my dad with dinner at Lure","date":"2026-06-21","format":"reel","caption":"Collab post to celebrate Father's Day"},{"id":19,"title":"Summer brand — patio / atmosphere","date":"2026-06-23","format":"carousel","caption":"This is what summer tastes like.\nLonger days, great company, fresh fish. There's no better place to be as June settles in — and we've saved a table for you.\n\n#SummerDining #CaliforniaEats #CoastalDining #SummerVibes #SeafoodSeason"},{"id":20,"title":"Seed oil-free — clean eating season","date":"2026-06-28","format":"reel","caption":""}];
+let posts = [{"id":21,"title":"Casa Pacifica Recap Reel","date":"2026-06-09","format":"reel","caption":"This weekend at the Casa Pacifica Angels Wine, Food & Brew Festival, we brought charbroiled oysters, shrimp aguachile, and watermelon agua fresca — and had one of the busiest booths at the event.\n\nThank you to everyone who stopped by and tasted with us. We love getting out into the community and sharing what we do best.\nUntil next year.\n\n#cpwinefoodbrewfest #foodandwinefestival #foodie #vcevents #LureFishHouse"},{"id":15,"title":"World Cup + Happy Hour","date":"2026-06-11","format":"carousel","caption":"We're showing every match on our TVs — and we can't think of a better way to watch than with a cold drink and something fresh from the sea.\n\nHappy Hour is Monday through Friday 3–6pm + Sundays 11:30–5.\n\nGrab a seat before kickoff.\n\n#WorldCup2026 #WorldCup #HappyHour #WatchParty #LureFishHouse "},{"id":5,"title":"Giant Prawns","date":"2026-06-14","format":"carousel","caption":"We're gonna need a bigger grill. 🔥\n\nCome meet our giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason. Just don't call them shrimp."},{"id":16,"title":"Father's Day tease — Dad wants Catch of the Day","date":"2026-06-16","format":"reel","caption":"FOR CONCEPT (NEED TO SHOOT NEW PHOTOS) Dad doesn't want a card. He wants the catch of the day.\n\nFather's Day is June 21st — time to make your dinner plans. Lure is the kind of place that makes dads feel like the meal was worth the drive.\n\n#FathersDay #DadDeservesThis #FathersDayDinner #SeafoodRestaurant #FamilyDinner"},{"id":17,"title":"Lobster Day — menu feature + Father's Day bridge","date":"2026-06-20","format":"carousel","caption":"Happy National Lobster Day. We take this one seriously.\n\nThere are days that deserve a proper celebration — and this is one of them. Come in tonight, or better yet, bring Dad tomorrow and make it a weekend to remember.\n\n#NationalLobsterDay #LobsterDay #FreshSeafood #LobsterLover #CatchOfTheDay"},{"id":18,"title":"Father's Day UGC Content: Surprising my dad with dinner at Lure","date":"2026-06-21","format":"reel","caption":"Collab post to celebrate Father's Day"},{"id":19,"title":"Car Show Ventura","date":"2026-06-23","format":"reel","caption":"TBD - Need to figure out what we are doing for it. "},{"id":20,"title":"Your World Cup HQ","date":"2026-06-28","format":"reel","caption":"Your official World Cup headquarters just happens to serve incredible seafood. Every match. Every TV. Cold drinks, fresh fish, and the best seat in the house — all summer long.\n\nHappy Hour: Monday–Friday 3–6pm · Sunday 11:30–5pm\n\n#WorldCup2026 #WorldCupHQ #LureFishHouse #HappyHour #WatchParty "},{"id":22,"title":"Seed oil-free — clean eating season","date":"2026-06-30","format":"reel","caption":"Summer's here. Your food should be as clean as the season.\n\nLure has been 100% seed oil-free since 2025 — meaning every dish is cooked with real oils, real ingredients, and nothing your body doesn't recognize. No canola. No soybean. No shortcuts.\n\nJust the way seafood should be eaten.\n\n#LureFishHouse #SeedOilFree #CleanEating #RealFood #HealthyDining"}];
 
 // mediaStore: { postId: { type:'image'|'carousel'|'video', url?, urls?[], coverUrl? } }
-let mediaStore = {"2":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/3xaudjzcx4kjbg7ae6rrf/Lure_Social_2025_06_Jun2_GraduationPrivateDining_Post_01_v01.jpg?rlkey=cj0jyc4tutsjgnkyq2q6377f7&dl=0","https://www.dropbox.com/scl/fi/7imoaujqtxjwlq77yzaoy/Lure_Social_2025_06_Jun2_GraduationPrivateDining_Post_02_v01.jpg?rlkey=rmkgxkmluh4hswfqtzhckc9pi&dl=0","https://www.dropbox.com/scl/fi/jws40gpdqbxjxm5j282p9/Lure_Social_2025_06_Jun2_GraduationPrivateDining_Post_03_v01.jpg?rlkey=2z69942bs5ow74eksslbkbuxl&dl=0","https://www.dropbox.com/scl/fi/vhpckzwj1ytqoq74o49m9/Lure_Social_2025_06_Jun2_GraduationPrivateDining_Post_04_v01.jpg?rlkey=s0fe7ly323iqfhilku56jm3nt&dl=0"]},"3":{"type":"video","url":"https://www.dropbox.com/scl/fi/ghvmcwdj4krklvhujf7ba/Lure_Social_2025_06_Jun10_WorldOceansDay_Reel_v01.MP4?rlkey=y775w36m9adu1k0aqwxrxgvug&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/6skqsz5mazczkvzbrn3rf/Lure_Social_2025_06_Jun10_WorldOceansDay_Reel_Cover_v01.png?rlkey=7eo7xrynd0axwz31z3jb94ksa&dl=0"},"5":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/ba9scp3sriawoxm1p58hw/Lure_Social_2025_06_Jun14_GiantPrawns_Post_01_v01.jpg?rlkey=jwilit4m8ei0m9kd1k53iz5gb&dl=0","https://www.dropbox.com/scl/fi/ba9scp3sriawoxm1p58hw/Lure_Social_2025_06_Jun14_GiantPrawns_Post_01_v01.jpg?rlkey=jwilit4m8ei0m9kd1k53iz5gb&dl=0"]},"6":{"type":"video","url":"https://www.dropbox.com/scl/fi/zqi8jn1j7zd1zhna96bos/Lure_Social_2025_05_May19_SummerTeaser_Reel_v01.mp4?rlkey=fcu3q536wd8gb3llquk3rzf1r&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/loa8hdgema9c2niftdhk9/Lure_Social_2025_05_May19_SummerTeaser_Reel_Cover_v01.png?rlkey=3k0wal82mvtgmbhk615wqpzoz&dl=0"},"7":{"type":"video","url":"https://www.dropbox.com/scl/fi/8g5rue2o9k9url39tvg75/Lure_Social_2025_05_May22_LongWeekendHappyHour_Reel_v01.MP4?rlkey=qag0nr94i9vjl1sx9hbs4xsdr&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/zsxymbw0x3cmkv7iqojsj/Lure_Social_2025_05_May22_LongWeekendHappyHour_Reel_Cover_v01.png?rlkey=mh7ffka0iepij4rq34wzhw19o&dl=0"},"11":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/l4u35qo8iyrv0kswwab37/Lure_Social_2025_05_May25_SummerStartsNow_Post_01_v01.jpg?rlkey=y3btj8m7girn2vufzcrgfa1u9&dl=0","https://www.dropbox.com/scl/fi/0chmmuyo5ju9inehirxrn/Lure_Social_2025_05_May25_SummerStartsNow_Post_02_v01.jpg?rlkey=czs217jcoqw30c21dad34084l&dl=0","https://www.dropbox.com/scl/fi/sd9sj1xv9cnwz7vt7lifw/Lure_Social_2025_05_May25_SummerStartsNow_Post_03_v01.jpg?rlkey=s4j1ukygq7weqvg3h4upuoxkt&dl=0"]},"15":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/6cb7xmzo53o6kkccf76kf/Lure_Social_2025_06_Jun11_GraduationDining_Post_01_v01.jpg?rlkey=txx5b077ft7cupl12qfvapfka&dl=0","https://www.dropbox.com/scl/fi/b26qzya3zrl54l546lddl/Lure_Social_2025_06_Jun11_GraduationDining_Post_02_v01.jpg?rlkey=inky3oinh5eiyakqbosux77u8&dl=0","https://www.dropbox.com/scl/fi/iitup7hrlag2u3t3k3ixg/Lure_Social_2025_06_Jun11_GraduationDining_Post_03_v01.jpg?rlkey=8lo80g9wz2i57zgsg6svihvr7&dl=0"]},"16":{"type":"video","url":"https://www.dropbox.com/scl/fi/5g6ohy4n0tb6b95vm9jj9/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_v01.MP4?rlkey=l76xylwirubwrc7xb7dgagfmv&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/9u01v7zvum2hpazyvlro5/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_Cover_v01.png?rlkey=at5paz2sefrwd71u4dvx0aeku&dl=0"},"17":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/e9b7yrwvdafzrub59297l/Lure_Social_2025_06_Jun20_LobsterDay_Post_01_v01.jpg?rlkey=blugf3om639v5eb4o0pvrwo6x&dl=0","https://www.dropbox.com/scl/fi/z0ax1dzmttsrquwwnzx2g/Lure_Social_2025_06_Jun20_LobsterDay_Post_02_v01.jpg?rlkey=glrcfl3zrnixylcncselxc9ei&dl=0","https://www.dropbox.com/scl/fi/1codmoybxkpaygxjul5ft/Lure_Social_2025_06_Jun20_LobsterDay_Post_03_v01.jpg?rlkey=vxyrg5wk6qx3fqpr9jlhn76rd&dl=0"]}};
-let carouselIndex = {"2":0,"5":0,"11":0,"15":0,"17":0};
+let mediaStore = {"5":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/ba9scp3sriawoxm1p58hw/Lure_Social_2025_06_Jun14_GiantPrawns_Post_01_v01.jpg?rlkey=jwilit4m8ei0m9kd1k53iz5gb&dl=0","https://www.dropbox.com/scl/fi/1jojj1dw3p6toql50ijpj/Lure_Social_2025_06_Jun14_GiantPrawns_Post_02_v01.jpg?rlkey=9ugbck9uf56bhxb3mz26d3s24&dl=0"]},"15":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/1jbyzi418yv3qzkv6yqby/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_01_v01.jpg?rlkey=x5j6rf73umbu5k6vprhjtn67y&dl=0","https://www.dropbox.com/scl/fi/wuhlnxhyf6qdif4lvmppc/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_02_v01.jpg?rlkey=oxuv4jlzcv5p6wsra1nduylhm&dl=0","https://www.dropbox.com/scl/fi/h6hseruc6me4wj2nk7au1/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_03_v01.jpg?rlkey=shaq989kjme79nnliqjw2khn4&dl=0","https://www.dropbox.com/scl/fi/ecglk53c255mpenuor7jz/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_04_v01.jpg?rlkey=3pe645mtiwdm8y5pd5a84q24g&dl=0"]},"16":{"type":"video","url":"https://www.dropbox.com/scl/fi/5g6ohy4n0tb6b95vm9jj9/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_v01.MP4?rlkey=l76xylwirubwrc7xb7dgagfmv&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/9u01v7zvum2hpazyvlro5/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_Cover_v01.png?rlkey=at5paz2sefrwd71u4dvx0aeku&dl=0"},"17":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/e9b7yrwvdafzrub59297l/Lure_Social_2025_06_Jun20_LobsterDay_Post_01_v01.jpg?rlkey=blugf3om639v5eb4o0pvrwo6x&dl=0","https://www.dropbox.com/scl/fi/z0ax1dzmttsrquwwnzx2g/Lure_Social_2025_06_Jun20_LobsterDay_Post_02_v01.jpg?rlkey=glrcfl3zrnixylcncselxc9ei&dl=0","https://www.dropbox.com/scl/fi/1codmoybxkpaygxjul5ft/Lure_Social_2025_06_Jun20_LobsterDay_Post_03_v01.jpg?rlkey=vxyrg5wk6qx3fqpr9jlhn76rd&dl=0"]},"21":{"type":"video","url":"https://www.dropbox.com/scl/fi/yw2eihogxgyr2c5uc61ax/Lure_Social_2025_06_Jun9_CasaPacifica_Reel_v01.MP4?rlkey=jgcuxudl23w7700xk7kfhp3dc&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/j60intf8a4g4w8obf1iiz/Lure_Social_2025_06_Jun9_CasaPacifica_Reel_Cover_v01.jpg?rlkey=ta8zmcea6vuuyq1ge7ayv125n&dl=0"}};
+let carouselIndex = {"5":0,"15":0,"17":0};
 let currentView = 'grid';
 let currentFilter = 'all';
 
@@ -2059,12 +2356,11 @@ function saveFile(){
   out=out.replace(/let showingAddForm = false;/,'let showingAddForm = false;');
   out=out.replace(/window\.__pageTemplate = document\.documentElement\.outerHTML;/,'window.__pageTemplate = document.documentElement.outerHTML;');
 
-  const blob=new Blob([out],{type:'text/html;charset=utf-8'});
+  const b64=btoa(unescape(encodeURIComponent(out)));
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
+  a.href='data:text/html;charset=utf-8;base64,'+b64;
   a.download='Lure_Social_Post_Review.html';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   setTimeout(()=>{btn.innerHTML=original;},1500);
 }
 
