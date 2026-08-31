@@ -1,4 +1,403 @@
 <html lang="en"><head>
+    <script>
+      (function() {
+        // Capture host references before any artifact code runs: Window.parent
+        // is [Replaceable] (a top-level `var parent` in artifact code would
+        // replace the accessor with a data property), and a top-level
+        // `const crypto` would shadow the global — either would otherwise
+        // silently break the bridge for artifacts that worked before.
+        const realParent = window.parent;
+        const cryptoObj = window.crypto;
+        // html-to-image is only used by takeScreenshot: fetched on first use, not as a
+        // parser-blocking tag. Native fetch, captured before the proxy override below.
+        const realFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
+        const HTML_TO_IMAGE_SRC = "https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js";
+        const HTML_TO_IMAGE_INTEGRITY = "sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==";
+        let htmlToImageLoad = null;
+        const loadHtmlToImage = () => {
+          if (!htmlToImageLoad) {
+            htmlToImageLoad = (realFetch
+              ? realFetch(HTML_TO_IMAGE_SRC, { integrity: HTML_TO_IMAGE_INTEGRITY, credentials: 'omit', referrerPolicy: 'no-referrer' })
+              : Promise.reject(new Error('fetch unavailable'))
+            )
+              .then((res) => {
+                if (!res.ok) throw new Error('html-to-image failed to load (' + res.status + ')');
+                return res.text();
+              })
+              .then((source) => {
+                // UMD bundle: hide the artifact's AMD/CommonJS globals so it takes the
+                // window-global branch; inline script text runs synchronously on insert.
+                const hidden = ['define', 'module', 'exports'].map((k) => {
+                  const entry = { k, own: Object.prototype.hasOwnProperty.call(window, k), v: window[k] };
+                  try { window[k] = undefined; } catch (e) {}
+                  return entry;
+                });
+                try {
+                  const el = document.createElement('script');
+                  el.text = source;
+                  (document.head || document.documentElement).appendChild(el);
+                } finally {
+                  hidden.forEach(({ k, own, v }) => {
+                    try { if (own) { window[k] = v; } else { delete window[k]; } } catch (e) {}
+                  });
+                }
+                if (!window.htmlToImage) throw new Error('html-to-image unavailable after load');
+                return window.htmlToImage;
+              });
+            // A failed load may be transient; let the next screenshot retry.
+            htmlToImageLoad.catch(() => { htmlToImageLoad = null; });
+          }
+          return htmlToImageLoad;
+        };
+        // crypto.randomUUID exists only in Secure Contexts; fall back to a
+        // unique non-crypto id elsewhere (http://LAN-IP dev flows) —
+        // uniqueness is what the bridge needs, unpredictability is
+        // defense-in-depth on top of the source guards.
+        const newRequestId =
+          cryptoObj && typeof cryptoObj.randomUUID === "function"
+            ? function () { return cryptoObj.randomUUID(); }
+            : function () { return Date.now() + "-" + Math.random(); };
+        const originalConsole = window.console;
+        window.console = {
+          log: (...args) => {
+            originalConsole.log(...args);
+            realParent.postMessage({ type: 'console', message: args.join(' ') }, '*');
+          },
+          error: (...args) => {
+            originalConsole.error(...args);
+            realParent.postMessage({ type: 'console', message: 'Error: ' + args.join(' ') }, '*');
+          },
+          warn: (...args) => {
+            originalConsole.warn(...args);
+            realParent.postMessage({ type: 'console', message: 'Warning: ' + args.join(' ') }, '*');
+          }
+        };
+
+        // Bridge request ids are crypto-random (not sequential) so they
+        // cannot be predicted by other frames in the tab.
+        let callbacksMap = new Map();
+        let streamControllers = new Map();
+        
+        window.claude = {
+          complete: (prompt) => {
+            return new Promise((resolve, reject) => {
+              const id = newRequestId();
+              callbacksMap.set(id, { resolve, reject });
+              realParent.postMessage({ type: 'claudeComplete', id, prompt }, '*');
+            });
+          }
+        };
+
+        window.storage = {
+          get: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = newRequestId();
+              callbacksMap.set(id, { resolve, reject });
+              realParent.postMessage({ type: 'storageGet', id, key, shared }, '*');
+            });
+          },
+          set: (key, value, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = newRequestId();
+              callbacksMap.set(id, { resolve, reject });
+              realParent.postMessage({ type: 'storageSet', id, key, value, shared }, '*');
+            });
+          },
+          delete: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = newRequestId();
+              callbacksMap.set(id, { resolve, reject });
+              realParent.postMessage({ type: 'storageDelete', id, key, shared }, '*');
+            });
+          },
+          list: (prefix, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = newRequestId();
+              callbacksMap.set(id, { resolve, reject });
+              realParent.postMessage({ type: 'storageList', id, prefix, shared }, '*');
+            });
+          }
+        };
+
+        let pendingBlobs = new Map();
+        URL.createObjectURL = (blob) => {
+          // Store the blob and create an ID and URL for it
+          const blobId = `blob-${Date.now()}-${Math.random()}`;
+          pendingBlobs.set(blobId, blob);
+          return `blob-request://${blobId}`;
+        };
+
+        URL.revokeObjectURL = (url) => {
+          // Remove the blob from our store
+          const blobId = url.replace("blob-request://", "");
+          pendingBlobs.delete(blobId);
+        };
+
+        const getBlobFromURL = (url) => {
+          const blobId = url.replace("blob-request://", "");
+          return pendingBlobs.get(blobId);
+        };
+
+        // Override global fetch with streaming support
+        window.fetch = (url, init = {}) => {
+          return new Promise((resolve, reject) => {
+            const id = newRequestId();
+            const channelId = `fetch-${id}-${Date.now()}`;
+            
+            callbacksMap.set(id, { 
+              resolve: (response) => {
+                // Null-body statuses: Response(stream, {status: 204}) throws
+                // per the Fetch spec, which would escape this resolver and
+                // hang the artifact's await forever.
+                if (response.status === 204 || response.status === 205 || response.status === 304) {
+                  try {
+                    resolve(new Response(null, {
+                      status: response.status,
+                      statusText: response.statusText,
+                      headers: response.headers
+                    }));
+                  } catch (err) {
+                    // Invalid statusText/header bytes can throw here too.
+                    reject(new TypeError(
+                      'Bridge fetch: unconstructable response (status ' + response.status + ')'
+                    ));
+                  }
+                  return;
+                }
+                // Create a ReadableStream for the response body
+                const stream = new ReadableStream({
+                  start(controller) {
+                    streamControllers.set(channelId, controller);
+                  },
+                  cancel() {
+                    streamControllers.delete(channelId);
+                  }
+                });
+                
+                // Create and return the Response with the stream. Response()
+                // requires status in [200, 599]; an opaque/no-cors fetch
+                // forwards status 0, which would throw here and escape the
+                // resolver, hanging the artifact's await. Surface it as a
+                // network-error-shaped rejection instead.
+                try {
+                  resolve(new Response(stream, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers
+                  }));
+                } catch (err) {
+                  streamControllers.delete(channelId);
+                  reject(new TypeError(
+                    'Bridge fetch: unconstructable response (status ' + response.status + ')'
+                  ));
+                }
+              },
+              reject,
+              channelId
+            });
+            
+            realParent.postMessage({
+              type: 'proxyFetch',
+              id,
+              url,
+              init,
+              channelId
+            }, '*');
+          });
+        };
+
+        window.addEventListener('message', async (event) => {
+          // Only the embedding parent may drive the bridge — sibling and
+          // nested frames can also postMessage into this window.
+          if (event.source !== realParent) return;
+          if (event.data.type === 'takeScreenshot') {
+            // Echo the request's nonce so the requester can correlate the
+            // reply to ITS request — a reply without the expected nonce
+            // (e.g. from a stale pre-remount artifact) is ignored upstream.
+            const screenshotNonce = event.data.nonce;
+            const rootElement = document.getElementById('artifacts-component-root-html');
+            if (!rootElement) {
+              realParent.postMessage({
+                type: 'screenshotError',
+                nonce: screenshotNonce,
+                error: new Error('Root element not found'),
+              }, '*');
+              return;
+            }
+            // Catch CDN load failures and toPng errors so the parent always
+            // gets a response instead of hanging forever.
+            try {
+              const htmlToImage = await loadHtmlToImage();
+              const screenshot = await htmlToImage.toPng(rootElement, {
+                imagePlaceholder:
+                  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjePDgwX8ACOQDoNsk0PMAAAAASUVORK5CYII=",
+              });
+              realParent.postMessage({
+                type: 'screenshotData',
+                nonce: screenshotNonce,
+                data: screenshot,
+              }, '*');
+            } catch (err) {
+              realParent.postMessage({
+                type: 'screenshotError',
+                nonce: screenshotNonce,
+                error: err instanceof Error ? err : new Error(String(err)),
+              }, '*');
+            }
+          } else if (event.data.type === 'claudeComplete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.completion);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'proxyFetchResponse') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+              callbacksMap.delete(event.data.id);
+            } else {
+              // Initial response with headers, status, etc.
+              callback.resolve({
+                status: event.data.status,
+                statusText: event.data.statusText,
+                headers: event.data.headers
+              });
+              // Don't delete the callback yet if streaming
+              if (!event.data.body) {
+                callbacksMap.delete(event.data.id);
+              }
+            }
+          } else if (event.data.type === 'proxyFetchStream') {
+            // Handle streaming data chunks
+            const controller = streamControllers.get(event.data.channelId);
+            if (controller) {
+              if (event.data.error) {
+                controller.error(new Error(event.data.error));
+                streamControllers.delete(event.data.channelId);
+              } else if (event.data.done) {
+                controller.close();
+                streamControllers.delete(event.data.channelId);
+                // Clean up the callback
+                const callback = Array.from(callbacksMap.entries()).find(
+                  ([_, value]) => value.channelId === event.data.channelId
+                );
+                if (callback) {
+                  callbacksMap.delete(callback[0]);
+                }
+              } else if (event.data.chunk) {
+                controller.enqueue(new Uint8Array(event.data.chunk));
+              }
+            }
+          } else if (event.data.type === 'storageGet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageSet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageDelete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageList') {
+            const callback = callbacksMap.get(event.data.id);
+            if (!callback) return;
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          }
+        });
+
+        window.addEventListener('click', (event) => {
+          const isEl = event.target instanceof HTMLElement;
+          if (!isEl) return;
+    
+          // find ancestor links
+          const linkEl = event.target.closest("a");
+          if (!linkEl || !linkEl.href) return;
+    
+          event.preventDefault();
+          event.stopImmediatePropagation();
+    
+          if (linkEl.href.startsWith("blob-request:")) {
+            const blob = getBlobFromURL(linkEl.href);
+            if (!blob) return;
+            void blob.arrayBuffer().then((data) => {
+              realParent.postMessage({
+                type: "downloadFile",
+                filename: linkEl.download,
+                data,
+                mimeType: blob.type || "application/octet-stream",
+              });
+            });
+          } else if (linkEl.href.startsWith("data:")) {
+            const [header, base64Data] = linkEl.href.split(",");
+            const mimeMatch = header.match(/data:([^;]+)/);
+            const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+            const binaryString = atob(base64Data);
+            const data = Uint8Array.from(binaryString, (c) =>
+              c.charCodeAt(0),
+            ).buffer;
+            realParent.postMessage({
+              type: "downloadFile",
+              filename: linkEl.download,
+              data,
+              mimeType,
+            });
+          } else {
+            let linkUrl;
+            try {
+              linkUrl = new URL(linkEl.href);
+            } catch (error) {
+              return;
+            }
+    
+            if (linkUrl.hostname === window.location.hostname) return;
+      
+            realParent.postMessage({
+              type: 'openExternal',
+              href: linkEl.href,
+            }, '*');
+          }
+      });
+
+        const originalOpen = window.open;
+        window.open = function (url) {
+          realParent.postMessage({
+            type: "openExternal",
+            href: url,
+          }, "*");
+        };
+
+        window.addEventListener('error', (event) => {
+          realParent.postMessage({ type: 'console', message: 'Uncaught Error: ' + event.message }, '*');
+        });
+      })();
+    </script>
+  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
       (function() {
@@ -2207,11 +2606,11 @@ Come meet them.</textarea>
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
-let posts = [{"id":21,"title":"Casa Pacifica Recap Reel","date":"2026-06-09","format":"reel","caption":"This weekend at the Casa Pacifica Angels Wine, Food & Brew Festival, we brought charbroiled oysters, shrimp aguachile, and watermelon agua fresca — and had one of the busiest booths at the event.\n\nThanks to our partner Coastal Provisions for making sure we always have the best, freshest seafood.\n\nThank you to everyone who stopped by and tasted with us. We love getting out into the community and sharing what we do best.\n\nUntil next year.\n\n#cpwinefoodbrewfest #foodandwinefestival #foodie #vcevents #LureFishHouse"},{"id":15,"title":"World Cup + Happy Hour","date":"2026-06-11","format":"carousel","caption":"We're showing every match on our TVs — and we can't think of a better way to watch than with a cold drink and something fresh from the sea.\n\nHappy Hour is Monday through Friday 3–6pm + Sundays 11:30–5.\n\nGrab a seat before kickoff.\n\n#WorldCup2026 #WorldCup #HappyHour #WatchParty #LureFishHouse "},{"id":5,"title":"Giant Prawns","date":"2026-06-14","format":"carousel","caption":"We're gonna need a bigger grill. 🔥\n\nCome meet our giant prawns — grilled, fresh, and honestly a little intimidating. On the menu year-round, for good reason. Just don't call them shrimp."},{"id":16,"title":"Father's Day tease — Dad wants Catch of the Day","date":"2026-06-16","format":"reel","caption":"Dad doesn't want a card. He wants the catch of the day.\n\nFather's Day is June 21st — time to make your dinner plans. Lure is the kind of place that makes dads feel like the meal was worth the drive.\n\n#FathersDay #DadDeservesThis #FathersDayDinner #SeafoodRestaurant #FreshCatch"},{"id":17,"title":"Lobster Day — menu feature + Father's Day bridge","date":"2026-06-20","format":"carousel","caption":"Happy National Lobster Day. We take this one seriously.\n\nThere are days that deserve a proper celebration — and this is one of them. Come in tonight, or better yet, bring Dad tomorrow and make it a weekend to remember.\n\n#NationalLobsterDay #LobsterDay #FreshSeafood #LobsterLover #CatchOfTheDay"},{"id":18,"title":"Father's Day UGC Content: Surprising my dad with dinner at Lure","date":"2026-06-21","format":"reel","caption":"Collab post to celebrate Father's Day"},{"id":19,"title":"Car Show Ventura","date":"2026-06-23","format":"reel","caption":"TBD - Need to figure out what we are doing for it. "},{"id":20,"title":"Your World Cup HQ","date":"2026-06-28","format":"reel","caption":"Your official World Cup headquarters just happens to serve incredible seafood. Every match. Every TV. Cold drinks, fresh fish, and the best seat in the house — all summer long.\n\nHappy Hour: Monday–Friday 3–6pm · Sunday 11:30–5pm\n\n#WorldCup2026 #WorldCupHQ #LureFishHouse #HappyHour #WatchParty "},{"id":22,"title":"Seed oil-free — clean eating season","date":"2026-06-30","format":"reel","caption":"Summer's here. Your food should be as clean as the season.\n\nLure has been 100% seed oil-free since 2025 — meaning every dish is cooked with real oils, real ingredients, and nothing your body doesn't recognize. No canola. No soybean. No shortcuts.\n\nJust the way seafood should be eaten.\n\n#LureFishHouse #SeedOilFree #CleanEating #RealFood #HealthyDining"}];
+let posts = [{"id":1,"title":"Agua Fresca Spotlight","date":"2026-08-28","format":"carousel","caption":"Fresh watermelon or cucumber lime, sweetened with organic coconut sugar. And that's not just the agua fresca — every cocktail on our menu is made with low-glycemic coconut sugar instead of refined syrup.\n\n#LureFishHouse #AguaFresca #CoconutSugar #LowGlycemic #CraftCocktails\n\nLure Fish House serves fresh watermelon and cucumber lime agua fresca, sweetened with organic coconut sugar — and that same low-glycemic coconut sugar goes into every cocktail on the bar menu. It's part of the fresh, seasonal, ingredient-conscious approach guests find across all seven Lure Fish House locations in California and Arizona, from Ventura and Santa Barbara to Scottsdale."},{"id":2,"title":"Secret Menu Hack","date":"2026-08-31","format":"carousel","caption":"Secret menu hack. Did you know that you can swap the fish in our Fish & Chips for fried shrimp? All the way, or half and half. Your call.\n\n#LureFishHouse #SecretMenu #MenuHack #FriedShrimp #FishAndChips\n\nYour local seafood restaurant for sustainable, seed oil-free, healthy cooking, made from scratch. Oyster bar, happy hour, and a fresh daily catch menu. Lure is proud to be an Ocean Friendly Restaurant in partnership with the Surfrider Foundation.\n"},{"id":3,"title":"Poll / Interactive Post","date":"2026-09-02","format":"feed","caption":"[Poll sticker: Raw 🦪 vs. Charbroiled 🔥] \nRaw or Charbroiled? Pick a side. \nTell us in the comments why you're right.\n\n#LureFishHouse #OystersRawOrBroiled #RawBar #SeafoodDebate\n\nOn the Half Shell or Charbroiled — Lure Fish House wants to know how you take your oysters. As a sustainably sourced seafood restaurant with a full raw bar at every location, from Ventura and Santa Barbara to Scottsdale, Lure serves fresh oysters daily, shucked to order and ready either way. Vote in the poll and join the debate."},{"id":4,"title":"Labor Day - Outdoor Dining","date":"2026-09-06","format":"reel","caption":"Last long weekend of summer. A good excuse to eat outside, order the whole raw bar, and let someone else do the dishes.\n\n#LureFishHouse #LaborDayWeekend #SeafoodRestaurant #FreshCatch #CoastalEats\n\nLure Fish House is a coastal seafood restaurant with locations in Ventura, Camarillo, Santa Barbara, Westlake Village, Porter Ranch, San Luis Obispo, and Scottsdale. Every menu is built around fresh, sustainably sourced seafood, seasonal ingredients, and 100% seed-oil-free cooking. Labor Day weekend is one of the best times to catch us on the patio before summer winds down — walk-ins welcome at most locations, no reservation required."},{"id":5,"title":"California Wine Month","date":"2026-09-08","format":"carousel","caption":"It's California Wine Month, and we have many local options on our wine list. [Insert 2–3 CA wines on the list + what they pair with.] Ask your server for the pairing.\n\n#LureFishHouse #CaliforniaWineMonth #WineAndSeafood #CoastalDining\n\nLure Fish House pairs fresh, sustainably sourced seafood with a California-forward wine list, and September is the month to explore it. From Ventura and Santa Barbara to Scottsdale, every location features seasonal seafood dishes designed to pair with California wine. Ask your server for a recommendation and taste the coast in the glass and on the plate."},{"id":6,"title":"Oyster Bar Highlight","date":"2026-09-13","format":"carousel","caption":"Come visit our talented oyster bartenders — they'll walk you through the lineup, shuck it fresh, and tell you exactly what you're tasting. [Insert new Oyster Bar menu details when confirmed.]\n\n#LureFishHouse #OysterBar #FreshShucked #RawBar\n\nThe oyster bar at Lure Fish House is the heart of the seafood restaurant experience. Our oyster bartenders shuck to order and walk guests through the current lineup — where each oyster is from, what it tastes like, and how to eat it. Find the raw bar at every Lure location, from Ventura and Camarillo to San Luis Obispo and Scottsdale."},{"id":7,"title":"Wild Sockeye Salmon","date":"2026-09-15","format":"carousel","caption":"Wild sockeye, not farmed. Deeper color, firmer texture, cleaner flavor — the difference shows up on the plate. On the menu now.\n\n#LureFishHouse #WildSockeye #WildCaughtSalmon #FreshCatch\n\nWild sockeye salmon is now on the menu at Lure Fish House, a sustainably sourced seafood restaurant with locations in Ventura, Camarillo, Santa Barbara, Westlake Village, Porter Ranch, San Luis Obispo, and Scottsdale. Wild-caught, never farmed, and prepared with fresh, seasonal ingredients — this is what sets Lure apart as a coastal seafood destination."},{"id":8,"title":"Arizona Restaurant Week","date":"2026-09-18","format":"carousel","caption":"Arizona Restaurant Week starts 9/18. Scottsdale, this one's for you. Through September 27, enjoy a special 3-course menu for $44 per person. \n\n#LureFishHouse #ArizonaRestaurantWeek #ScottsdaleEats #SeafoodScottsdale\n\nLure Fish House is proud to take part in Arizona Restaurant Week starting September 18 at our Scottsdale location. Known for fresh, sustainably sourced seafood and a seasonal, locally driven menu, Lure brings the same coastal seafood restaurant standard to Arizona that guests know from our California locations in Ventura, Camarillo, Santa Barbara, Westlake Village, Porter Ranch, and San Luis Obispo."}];
 
 // mediaStore: { postId: { type:'image'|'carousel'|'video', url?, urls?[], coverUrl? } }
-let mediaStore = {"5":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/ba9scp3sriawoxm1p58hw/Lure_Social_2025_06_Jun14_GiantPrawns_Post_01_v01.jpg?rlkey=jwilit4m8ei0m9kd1k53iz5gb&dl=0","https://www.dropbox.com/scl/fi/1jojj1dw3p6toql50ijpj/Lure_Social_2025_06_Jun14_GiantPrawns_Post_02_v01.jpg?rlkey=9ugbck9uf56bhxb3mz26d3s24&dl=0"]},"15":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/1jbyzi418yv3qzkv6yqby/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_01_v01.jpg?rlkey=x5j6rf73umbu5k6vprhjtn67y&dl=0","https://www.dropbox.com/scl/fi/wuhlnxhyf6qdif4lvmppc/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_02_v01.jpg?rlkey=oxuv4jlzcv5p6wsra1nduylhm&dl=0","https://www.dropbox.com/scl/fi/h6hseruc6me4wj2nk7au1/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_03_v01.jpg?rlkey=shaq989kjme79nnliqjw2khn4&dl=0","https://www.dropbox.com/scl/fi/ecglk53c255mpenuor7jz/Lure_Social_2025_06_Jun11_WorldCupHappyHour_Post_04_v01.jpg?rlkey=3pe645mtiwdm8y5pd5a84q24g&dl=0"]},"16":{"type":"video","url":"https://www.dropbox.com/scl/fi/p01vropsthfszowdym6em/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_v02.MP4?rlkey=321abl71uu5q6fytpi5plp1ev&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/thmxjbe2y8y5g7ph74eqi/Lure_Social_2025_06_Jun18_FathersDayCatch_Reel_Cover_v02.jpg?rlkey=ei2d7achzfggqgbh6f01ikx38&dl=0"},"17":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/e9b7yrwvdafzrub59297l/Lure_Social_2025_06_Jun20_LobsterDay_Post_01_v01.jpg?rlkey=blugf3om639v5eb4o0pvrwo6x&dl=0","https://www.dropbox.com/scl/fi/z0ax1dzmttsrquwwnzx2g/Lure_Social_2025_06_Jun20_LobsterDay_Post_02_v01.jpg?rlkey=glrcfl3zrnixylcncselxc9ei&dl=0","https://www.dropbox.com/scl/fi/1codmoybxkpaygxjul5ft/Lure_Social_2025_06_Jun20_LobsterDay_Post_03_v01.jpg?rlkey=vxyrg5wk6qx3fqpr9jlhn76rd&dl=0"]},"20":{"type":"video","url":"https://www.dropbox.com/scl/fi/ckjgjtbo4i1ybg727cnsw/Lure_Social_2025_06_Jun28_WorldCupHQ_Reel_v01.mp4?rlkey=1ig5voi4196ydk6l8nfqh3le2&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/eqskbelq7l2p9t86dcfts/Lure_Social_2025_06_Jun28_WorldCupHQ_Reel_Cover_v01.jpg?rlkey=jbs40lehe5x95v287x1n4svjh&dl=0"},"21":{"type":"video","url":"https://www.dropbox.com/scl/fi/yw2eihogxgyr2c5uc61ax/Lure_Social_2025_06_Jun9_CasaPacifica_Reel_v01.MP4?rlkey=jgcuxudl23w7700xk7kfhp3dc&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/j60intf8a4g4w8obf1iiz/Lure_Social_2025_06_Jun9_CasaPacifica_Reel_Cover_v01.jpg?rlkey=ta8zmcea6vuuyq1ge7ayv125n&dl=0"}};
-let carouselIndex = {"5":0,"15":0,"17":0};
+let mediaStore = {"1":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/ldjh5a88ah3ogurqu729g/Lure_Social_2025_08_Aug28_AguaFresca_Post_01_v01.jpg?rlkey=s8jucrx6g8b1xt10npvrmms4v&dl=0","https://www.dropbox.com/scl/fi/wkn8iug79anr3bbfwg1zc/Lure_Social_2025_08_Aug28_AguaFresca_Post_02_v01.jpg?rlkey=kp4nnbtmijhif4luta00m12op&dl=0","https://www.dropbox.com/scl/fi/fre90yruj9dj9sensnznl/Lure_Social_2025_08_Aug28_AguaFresca_Post_03_v01.jpg?rlkey=zisl81lzdyy34csamd5hkgpaj&dl=0"]},"2":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/wyk0rd4t3w0bda6zgcav1/Lure_Social_2025_08_Aug31_SecretMenuHack_Post_01_v01.jpg?rlkey=c3fd73zcj6lcr78lg2udtb6tz&dl=0","https://www.dropbox.com/scl/fi/1jmrjhvt0ftqlxwlacfwa/Lure_Social_2025_08_Aug31_SecretMenuHack_Post_02_v01.jpg?rlkey=qo8u0x0qid2nljg4vdrlpyhu6&dl=0","https://www.dropbox.com/scl/fi/upywsgjn29r7pkgcd5vya/Lure_Social_2025_08_Aug31_SecretMenuHack_Post_03_v01.jpg?rlkey=y03v7ahwjj0v42oo9lami4ic1&dl=0"]},"3":{"type":"carousel","urls":["https://www.dropbox.com/scl/fi/mtpuf5gd20x6044cxbpaz/Lure_Social_2025_09_Sep_OysterPoll_01_v01.jpg?rlkey=912s7e4riu5rciu6h0oyqcz8v&dl=0"]},"4":{"type":"video","url":"https://www.dropbox.com/scl/fi/defjf35eslbn33nwpucoc/Lure_Social_2025_09_Sep6_LaborDay_v01.mp4?rlkey=tstxndr4fxijeraqpd1l05wjg&dl=0","coverUrl":"https://www.dropbox.com/scl/fi/r77o237szwqsgwgejza60/Lure_Social_2025_09_Sep6_LaborDay_Cover_v01.jpg?rlkey=azak6sjkx083t0ppqqejpnasv&dl=0"}};
+let carouselIndex = {"1":0,"2":0,"3":0};
 let currentView = 'grid';
 let currentFilter = 'all';
 
